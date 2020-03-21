@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import jQuery from 'jquery';
 import './index.css';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
@@ -15,3 +16,27 @@ ReactDOM.render(
 // unregister() to register() below. Note this comes with some pitfalls.
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
+
+interface TrelloClient {
+  authorize: (options: object) => void;
+}
+
+declare global {
+  interface Window {
+    Trello: TrelloClient;
+    TrelloReady: boolean;
+    jQuery: JQueryStatic;
+  }
+}
+
+window.jQuery = jQuery;
+
+window.addEventListener('load', () => {
+  window.Trello.authorize({
+    name: 'Multiboard',
+    expiration: 'never',
+    success: function () {
+      window.TrelloReady = true;
+    },
+  });
+});
