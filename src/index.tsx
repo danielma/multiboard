@@ -17,26 +17,11 @@ ReactDOM.render(
 // Learn more about service workers: https://bit.ly/CRA-PWA
 serviceWorker.unregister();
 
-interface TrelloClient {
-  authorize: (options: object) => void;
-}
-
 declare global {
   interface Window {
     Trello: TrelloClient;
-    TrelloReady: boolean;
     jQuery: JQueryStatic;
   }
 }
 
 window.jQuery = jQuery;
-
-window.addEventListener('load', () => {
-  window.Trello.authorize({
-    name: 'Multiboard',
-    expiration: 'never',
-    success: function () {
-      window.TrelloReady = true;
-    },
-  });
-});

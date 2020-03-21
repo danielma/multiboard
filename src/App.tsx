@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
-import logo from './logo.svg';
 import './App.css';
+import config from './config.json';
+import { getBoards } from './utils/trello';
 
 function backoff(done: () => boolean, callback: () => void): void {
   let time = 50;
@@ -23,8 +24,16 @@ export default function App() {
   const [trelloReady, setTrelloReady] = useState(false);
   useEffect(() => {
     backoff(
-      () => window.TrelloReady,
-      () => setTrelloReady(true)
+      () => !!window.Trello,
+      () => {
+        window.Trello.authorize({
+          name: 'Multiboard',
+          expiration: 'never',
+          success: function () {
+            setTrelloReady(true);
+          },
+        });
+      }
     );
   }, []);
 
@@ -36,23 +45,18 @@ export default function App() {
         />
       </Helmet>
 
-      <div className='App'>
-        <header className='App-header'>
-          {trelloReady ? 'READY' : 'NOT READY'}
-          <img src={logo} className='App-logo' alt='logo' />
-          <p>
-            Edit <code>src/App.tsx</code> and save to reload.
-          </p>
-          <a
-            className='App-link'
-            href='https://reactjs.org'
-            target='_blank'
-            rel='noopener noreferrer'
-          >
-            Learn React
-          </a>
-        </header>
-      </div>
+      {trelloReady ? <TheActualApp /> : 'Waiting for trello :)'}
     </>
+  );
+}
+
+function TheActualApp() {
+  useEffect(() => {
+    getBoards().then((r) => console.log(r));
+  }, []);
+  return (
+    <div>
+      hey yeah! <pre>{JSON.stringify(config, null, 2)}</pre>
+    </div>
   );
 }

@@ -1,0 +1,12 @@
+{
+  "boards": ["Giving", "Accounts", "Login"],
+  "lists": ["Development", "Staging", "Production"],
+  "members": [
+    "danielhgma",
+    "wassimk",
+    "molawson",
+    "jgwilkerson",
+    "calebashton1",
+    "jeremyricketts"
+  ]
+}
