@@ -1,9 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
 import logo from './logo.svg';
 import './App.css';
 
+function backoff(done: () => boolean, callback: () => void): void {
+  let time = 50;
+  const exponent = 1.5;
+
+  function work() {
+    if (done()) {
+      callback();
+    } else {
+      setTimeout(work, time);
+      time = time ** exponent;
+    }
+  }
+
+  work();
+}
+
 export default function App() {
+  const [trelloReady, setTrelloReady] = useState(false);
+  useEffect(() => {
+    backoff(
+      () => window.TrelloReady,
+      () => setTrelloReady(true)
+    );
+  }, []);
+
   return (
     <>
       <Helmet>
@@ -14,6 +38,7 @@ export default function App() {
 
       <div className='App'>
         <header className='App-header'>
+          {trelloReady ? 'READY' : 'NOT READY'}
           <img src={logo} className='App-logo' alt='logo' />
           <p>
             Edit <code>src/App.tsx</code> and save to reload.
