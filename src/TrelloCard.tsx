@@ -10,7 +10,7 @@ const Wrapper = styled.a<{ background: string }>`
   background-color: ${(props) => props.background};
 
   padding: 4px;
-  border-radius: 2px;
+  border-radius: 4px;
 
   & + & {
     margin-top: 4px;
@@ -18,7 +18,7 @@ const Wrapper = styled.a<{ background: string }>`
 `;
 
 const Card = styled.div`
-  border-radius: 2px;
+  border-radius: 4px;
   background-color: #fff;
   border-bottom: 1px solid #b3b8c5;
 
@@ -72,6 +72,40 @@ const Avatar = styled(AvatarImage)`
   border-radius: 50%;
 `;
 
+const labelColors = {
+  yellow: '#f3d603',
+  green: '#60bd4f',
+  pink: '#ff78cb',
+  red: '#eb5b46',
+  black: '#354563',
+  purple: '#c477e0',
+};
+
+const LabelPill = styled.li<{ label: ITrelloLabel }>`
+  display: inline-block;
+  border-radius: 4px;
+  height: 8px;
+  min-width: 36px;
+  background-color: ${(p) => labelColors[p.label.color]};
+  line-height: 0;
+
+  & + & {
+    margin-left: 4px;
+  }
+`;
+
+function CardLabels({ card }: { card: ITrelloCard }) {
+  if (card.labels.length === 0) return null;
+
+  return (
+    <ul style={{ fontSize: 0, marginBottom: '4px' }}>
+      {card.labels.map((l) => (
+        <LabelPill key={l.id} label={l} />
+      ))}
+    </ul>
+  );
+}
+
 export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const { members } = useContext(MultiboardContext);
   const { board } = card;
@@ -89,6 +123,7 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
   return (
     <Wrapper background={background || ''} href={card.url} target='_blank'>
       <Card>
+        <CardLabels card={card} />
         <CardTitle>{card.name}</CardTitle>
         <CardFooter>
           <Members>

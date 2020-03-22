@@ -37,7 +37,15 @@ type ITrelloCard = {
   readonly idMembers: string[];
   readonly url: string;
 
+  readonly labels: ITrelloLabel[];
+
   readonly board: TrelloBoard;
+};
+
+type ITrelloLabel = {
+  id: string;
+  color: 'red' | 'pink' | 'black' | 'yellow' | 'green' | 'purple';
+  name: string;
 };
 
 type ITrelloMember = {
