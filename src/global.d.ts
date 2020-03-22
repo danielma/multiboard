@@ -42,9 +42,17 @@ type ITrelloCard = {
   readonly board: TrelloBoard;
 };
 
+type TrelloLabelColor =
+  | 'red'
+  | 'pink'
+  | 'black'
+  | 'yellow'
+  | 'green'
+  | 'purple';
+
 type ITrelloLabel = {
   id: string;
-  color: 'red' | 'pink' | 'black' | 'yellow' | 'green' | 'purple';
+  color: TrelloLabelColor;
   name: string;
 };
 

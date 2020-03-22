@@ -3,6 +3,8 @@ import { getBoards, getLists, getCards, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
 import store from 'store2';
 import TrelloCard from './TrelloCard';
+import Labels, { LabelPill, labelColors } from './Labels';
+import Members from './Members';
 
 type TrelloMultiList = {
   name: string;
@@ -53,8 +55,17 @@ function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
 }
 
 const Container = styled.div`
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   margin: 16px;
+`;
+
+const Lists = styled.div`
+  flex: 1;
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
 
   > div {
     margin-right: 8px;
@@ -71,7 +82,7 @@ const List = styled.div`
   padding: 8px;
   width: 290px;
 
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
 `;
 
@@ -136,6 +147,64 @@ function useCachedToggle(
   ];
 }
 
+type FilterOptions = {
+  label: TrelloLabelColor | null;
+  member: ITrelloMember | null;
+};
+
+type FilterBarProps = {
+  members: ITrelloMember[];
+  filter: FilterOptions;
+  onUpdateFilter: (newFilter: FilterOptions) => void;
+};
+
+const Bar = styled.div`
+  display: flex;
+`;
+
+function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
+  function filterColor(color: TrelloLabelColor) {
+    if (filter.label === color) {
+      onUpdateFilter({ ...filter, label: null });
+    } else {
+      onUpdateFilter({ ...filter, label: color });
+    }
+  }
+
+  function filterMember(member: ITrelloMember) {
+    if (filter.member?.id === member.id) {
+      onUpdateFilter({ ...filter, member: null });
+    } else {
+      onUpdateFilter({ ...filter, member: member });
+    }
+  }
+
+  return (
+    <>
+      <Bar>
+        <Labels showLabelText>
+          {Object.keys(labelColors).map((color) => (
+            <LabelPill
+              key={color}
+              color={color as TrelloLabelColor}
+              focused={filter.label ? filter.label === color : undefined}
+              onClick={() => filterColor(color as TrelloLabelColor)}
+            >
+              {color}
+            </LabelPill>
+          ))}
+        </Labels>
+        <Members
+          members={members}
+          onMemberClick={filterMember}
+          focused={filter.member}
+        />
+      </Bar>
+      <hr style={{ marginBottom: '4px' }} />
+    </>
+  );
+}
+
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
@@ -144,6 +213,11 @@ export default function Multiboard() {
     'showLabelText'
   );
   const lists = useMultiLists(boards);
+
+  const [filter, setFilter] = useState<FilterOptions>({
+    label: null,
+    member: null,
+  });
 
   useEffect(() => {
     getMembers().then((members) => {
@@ -155,27 +229,49 @@ export default function Multiboard() {
     });
   }, []);
 
+  function getCardsForList(list: TrelloMultiList): ITrelloCard[] {
+    let cards = list.cards;
+
+    if (filter.label) {
+      const { label } = filter;
+      cards = cards.filter((c) => c.labels.map((l) => l.color).includes(label));
+    }
+
+    if (filter.member) {
+      const { member } = filter;
+
+      cards = cards.filter((c) => c.idMembers.includes(member.id));
+    }
+
+    return cards.sort(
+      (cA, cB) =>
+        new Date(cB.dateLastActivity).getTime() -
+        new Date(cA.dateLastActivity).getTime()
+    );
+  }
+
   return (
     <MultiboardContext.Provider
       value={{ members, boards, showLabelText, toggleShowLabelText }}
     >
       <Container>
-        {lists.map((list) => (
-          <List key={list.name}>
-            <ListTitle>{list.name}</ListTitle>
-            <ListBody>
-              {list.cards
-                .sort(
-                  (cA, cB) =>
-                    new Date(cB.dateLastActivity).getTime() -
-                    new Date(cA.dateLastActivity).getTime()
-                )
-                .map((card) => (
+        <FilterBar
+          members={members}
+          filter={filter}
+          onUpdateFilter={setFilter}
+        />
+        <Lists>
+          {lists.map((list) => (
+            <List key={list.name}>
+              <ListTitle>{list.name}</ListTitle>
+              <ListBody>
+                {getCardsForList(list).map((card) => (
                   <TrelloCard key={card.id} card={card} />
                 ))}
-            </ListBody>
-          </List>
-        ))}
+              </ListBody>
+            </List>
+          ))}
+        </Lists>
       </Container>
     </MultiboardContext.Provider>
   );
