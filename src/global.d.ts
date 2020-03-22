@@ -12,10 +12,15 @@ interface TrelloClient {
   ) => void;
 }
 
-type TrelloBoard = {
+type TrelloBoard = ReadOnly<{
   name: string;
   id: string;
   prefs: {
     backgroundColor: string;
   };
-};
+}>;
+
+type TrelloList = ReadOnly<{
+  id: string;
+  name: string;
+}>;

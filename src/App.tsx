@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
 import './App.css';
-import config from './config.json';
 import { getBoards } from './utils/trello';
 
 function backoff(done: () => boolean, callback: () => void): void {
@@ -9,11 +8,12 @@ function backoff(done: () => boolean, callback: () => void): void {
   const exponent = 1.5;
 
   function work() {
+    console.log('backoff', time);
     if (done()) {
       callback();
     } else {
       setTimeout(work, time);
-      time = time ** exponent;
+      time = time * exponent;
     }
   }
 
@@ -22,6 +22,7 @@ function backoff(done: () => boolean, callback: () => void): void {
 
 export default function App() {
   const [trelloReady, setTrelloReady] = useState(false);
+
   useEffect(() => {
     backoff(
       () => !!window.Trello,
@@ -51,12 +52,17 @@ export default function App() {
 }
 
 function TheActualApp() {
+  const [boards, setBoards] = useState<TrelloBoard[]>([]);
+
   useEffect(() => {
-    getBoards().then((r) => console.log(r));
+    getBoards().then((r) => {
+      r.flatMap(setBoards);
+    });
   }, []);
+
   return (
     <div>
-      hey yeah! <pre>{JSON.stringify(config, null, 2)}</pre>
+      <pre>{JSON.stringify(boards, null, 2)}</pre>
     </div>
   );
 }
