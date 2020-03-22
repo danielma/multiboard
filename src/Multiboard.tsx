@@ -46,11 +46,7 @@ function useMultiLists(
       });
 
       Object.values(multiLists).map(async (multiList) => {
-        const cardGets = await Promise.all(
-          multiList.lists.map((l) =>
-            getCards(l, { skipCache: reloadCounter > 0 })
-          )
-        );
+        const cardGets = await Promise.all(multiList.lists.map(getCards));
 
         cardGets
           .flatMap((cg) => cg.forcedValue())

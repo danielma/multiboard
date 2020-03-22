@@ -26,7 +26,7 @@ export const LabelPill = styled.li<{
   margin-bottom: 4px;
   cursor: pointer;
 
-  ${(p) => p.focused === false && `opacity: 0.75`}
+  ${(p) => p.focused === false && `opacity: 0.4`}
 `;
 
 const Labels = styled.ul<{ showLabelText: boolean }>`
