@@ -81,3 +81,17 @@ export async function getCards(
     cards.flatMap((cards) => cards.map((c) => ({ ...c, board: list.board })))
   );
 }
+
+export async function getMembers(): TrelloResponse<ITrelloMember[]> {
+  const responses = await Promise.all(
+    config.members.map((id) => cachedGet<ITrelloMember>(`members/${id}`))
+  );
+
+  const anyFailure = responses.find((r) => r.isFailure());
+
+  if (anyFailure) {
+    return anyFailure.failure();
+  } else {
+    return Success.from(responses.map((r) => r.forcedValue()));
+  }
+}

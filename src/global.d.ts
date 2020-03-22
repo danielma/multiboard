@@ -34,6 +34,15 @@ type ITrelloCard = {
   readonly name: string;
   readonly pos: number;
   readonly dateLastActivity: string;
+  readonly idMembers: string[];
+  readonly url: string;
 
   readonly board: TrelloBoard;
+};
+
+type ITrelloMember = {
+  id: string;
+
+  avatarHash: string;
+  avatarUrl: string;
 };

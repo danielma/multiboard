@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getBoards, getLists, getCards } from './utils/trello';
+import { getBoards, getLists, getCards, getMembers } from './utils/trello';
 import styled from 'styled-components';
 import TrelloCard from './TrelloCard';
 
@@ -9,48 +9,49 @@ type TrelloMultiList = {
   cards: ITrelloCard[];
 };
 
-function useMultiLists(): TrelloMultiList[] {
+export const MultiboardContext = React.createContext<{
+  boards: TrelloBoard[];
+  members: ITrelloMember[];
+}>({ boards: [], members: [] });
+
+function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
   const [lists, setLists] = useState<TrelloMultiList[]>([]);
 
   useEffect(() => {
     async function effect() {
-      const boards = await getBoards();
-
       let multiLists: { [key: string]: TrelloMultiList } = {};
 
-      boards.flatMap(async (boards) => {
-        const listGets = await Promise.all(boards.map(getLists));
+      const listGets = await Promise.all(boards.map(getLists));
 
-        listGets
-          .flatMap((lg) => lg.forcedValue())
-          .forEach((list) => {
-            if (multiLists[list.name]) {
-              multiLists[list.name].lists.push(list);
-            } else {
-              multiLists[list.name] = {
-                name: list.name,
-                lists: [list],
-                cards: [],
-              };
-            }
+      listGets
+        .flatMap((lg) => lg.forcedValue())
+        .forEach((list) => {
+          if (multiLists[list.name]) {
+            multiLists[list.name].lists.push(list);
+          } else {
+            multiLists[list.name] = {
+              name: list.name,
+              lists: [list],
+              cards: [],
+            };
+          }
+        });
+
+      Object.values(multiLists).map(async (multiList) => {
+        const cardGets = await Promise.all(multiList.lists.map(getCards));
+
+        cardGets
+          .flatMap((cg) => cg.forcedValue())
+          .forEach((card) => {
+            multiList.cards.push(card);
           });
 
-        Object.values(multiLists).map(async (multiList) => {
-          const cardGets = await Promise.all(multiList.lists.map(getCards));
-
-          cardGets
-            .flatMap((cg) => cg.forcedValue())
-            .forEach((card) => {
-              multiList.cards.push(card);
-            });
-
-          setLists(Object.values(multiLists));
-        });
+        setLists(Object.values(multiLists));
       });
     }
 
     effect();
-  }, []);
+  }, [boards]);
 
   return lists;
 }
@@ -76,24 +77,38 @@ const List = styled.div`
 `;
 
 export default function Multiboard() {
-  const lists = useMultiLists();
+  const [boards, setBoards] = useState<TrelloBoard[]>([]);
+  const [members, setMembers] = useState<ITrelloMember[]>([]);
+  const lists = useMultiLists(boards);
+
+  useEffect(() => {
+    getMembers().then((members) => {
+      setMembers(members.forcedValue());
+    });
+
+    getBoards().then((boards) => {
+      setBoards(boards.forcedValue());
+    });
+  }, []);
 
   return (
-    <Container>
-      {lists.map((list) => (
-        <List key={list.name}>
-          <ListTitle>{list.name}</ListTitle>
-          {list.cards
-            .sort(
-              (cA, cB) =>
-                new Date(cB.dateLastActivity).getTime() -
-                new Date(cA.dateLastActivity).getTime()
-            )
-            .map((card) => (
-              <TrelloCard key={card.id} card={card} />
-            ))}
-        </List>
-      ))}
-    </Container>
+    <MultiboardContext.Provider value={{ members, boards }}>
+      <Container>
+        {lists.map((list) => (
+          <List key={list.name}>
+            <ListTitle>{list.name}</ListTitle>
+            {list.cards
+              .sort(
+                (cA, cB) =>
+                  new Date(cB.dateLastActivity).getTime() -
+                  new Date(cA.dateLastActivity).getTime()
+              )
+              .map((card) => (
+                <TrelloCard key={card.id} card={card} />
+              ))}
+          </List>
+        ))}
+      </Container>
+    </MultiboardContext.Provider>
   );
 }
