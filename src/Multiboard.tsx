@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, SetStateAction } from 'react';
 import { getBoards, getLists, getCards, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
 import store from 'store2';
@@ -107,17 +107,41 @@ export const MultiboardContext = React.createContext<{
   boards: TrelloBoard[];
   members: ITrelloMember[];
   showLabelText: boolean;
+  toggleShowLabelText: () => void;
 }>({
   boards: [],
   members: [],
   showLabelText: false,
+  toggleShowLabelText: () => undefined,
 });
+
+function toggle(oldValue: boolean) {
+  return !oldValue;
+}
+
+function useCachedToggle(
+  initialValue: boolean,
+  cacheKey: string
+): [boolean, () => void] {
+  const [value, setValue] = useState(
+    store.has(cacheKey) ? store.get(cacheKey) : initialValue
+  );
+
+  return [
+    value,
+    () => {
+      store.set(cacheKey, toggle(value));
+      setValue(toggle(value));
+    },
+  ];
+}
 
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
-  const [showLabelText, setShowLabelText] = useState(
-    store.get('showLabelText') || false
+  const [showLabelText, toggleShowLabelText] = useCachedToggle(
+    false,
+    'showLabelText'
   );
   const lists = useMultiLists(boards);
 
@@ -132,7 +156,9 @@ export default function Multiboard() {
   }, []);
 
   return (
-    <MultiboardContext.Provider value={{ members, boards, showLabelText }}>
+    <MultiboardContext.Provider
+      value={{ members, boards, showLabelText, toggleShowLabelText }}
+    >
       <Container>
         {lists.map((list) => (
           <List key={list.name}>

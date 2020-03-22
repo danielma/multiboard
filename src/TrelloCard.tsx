@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, CSSProperties } from 'react';
 import styled from 'styled-components/macro';
 import { MultiboardContext } from './Multiboard';
 
@@ -82,33 +82,53 @@ const labelColors = {
   purple: '#c477e0',
 };
 
-const LabelPill = styled.li<{ label: ITrelloLabel }>`
+const LabelPill = styled.li<{ trelloLabel: ITrelloLabel }>`
   display: inline-block;
   border-radius: 4px;
-  height: 8px;
+  min-height: 8px;
   min-width: 36px;
-  background-color: ${(p) => labelColors[p.label.color]};
-  line-height: 0;
-
-  & + & {
-    margin-left: 4px;
-  }
+  background-color: ${(p) => labelColors[p.trelloLabel.color]};
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  padding: 2px 6px;
+  margin-right: 4px;
+  margin-bottom: 4px;
 `;
 
-function CardLabels({ card }: { card: ITrelloCard }) {
+type CardLabelProps = {
+  card: ITrelloCard;
+  showLabelText: boolean;
+  toggleShowLabelText: () => void;
+};
+
+function CardLabels({
+  card,
+  showLabelText,
+  toggleShowLabelText,
+}: CardLabelProps) {
   if (card.labels.length === 0) return null;
 
+  const style: CSSProperties = {
+    fontSize: showLabelText ? '10px' : 0,
+    overflow: 'auto',
+  };
+
   return (
-    <ul style={{ fontSize: 0, marginBottom: '4px' }}>
+    <ul style={style} onClick={toggleShowLabelText}>
       {card.labels.map((l) => (
-        <LabelPill key={l.id} label={l} />
+        <LabelPill key={l.id} trelloLabel={l}>
+          {l.name}
+        </LabelPill>
       ))}
     </ul>
   );
 }
 
 export default function TrelloCard({ card }: { card: ITrelloCard }) {
-  const { members } = useContext(MultiboardContext);
+  const { members, showLabelText, toggleShowLabelText } = useContext(
+    MultiboardContext
+  );
   const { board } = card;
   const boardPrefs = board.prefs;
 
@@ -122,9 +142,18 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
     .filter((m) => m);
 
   return (
-    <Wrapper background={background || ''} href={card.url} target='_blank'>
+    <Wrapper
+      background={background || ''}
+      href={card.url}
+      target='_blank'
+      onClick={(e) => e.preventDefault()}
+    >
       <Card>
-        <CardLabels card={card} />
+        <CardLabels
+          card={card}
+          showLabelText={showLabelText}
+          toggleShowLabelText={toggleShowLabelText}
+        />
         <CardTitle>{card.name}</CardTitle>
         <CardFooter>
           <Members>
