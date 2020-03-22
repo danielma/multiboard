@@ -2,7 +2,7 @@ import config from '../config.json';
 import store from 'store2';
 import { Either, Success, Failure } from '../results';
 
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 
 function get(
   path: string,
@@ -48,28 +48,29 @@ async function cachedGet<T extends TrelloSuccess>(
   }
 }
 
-export async function getBoards(): Promise<
-  Either<TrelloBoard[], TrelloFailure>
-> {
-  const boards = await cachedGet<TrelloBoard[]>('members/me/boards', {
+type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
+const TrelloResponse = Promise;
+
+export async function getBoards(): TrelloResponse<TrelloBoard[]> {
+  return cachedGet<TrelloBoard[]>('members/me/boards', {
     params: { fields: 'id,name,prefs' },
     cacheKey: config.boards.sort().join('-'),
-  });
-
-  return boards.flatMap((boards) =>
-    boards.filter((b) => config.boards.includes(b.name))
+  }).then((boards) =>
+    boards.flatMap((boards) =>
+      boards.filter((b) => config.boards.includes(b.name))
+    )
   );
 }
 
 export async function getLists(
   board: TrelloBoard
-): Promise<Either<TrelloList[], TrelloFailure>> {
-  const lists = await cachedGet<TrelloList[]>(`boards/${board.id}/lists`, {
+): TrelloResponse<TrelloList[]> {
+  return cachedGet<TrelloList[]>(`boards/${board.id}/lists`, {
     params: { filter: 'open', cards: 'none', fields: 'id,name' },
     cacheKey: config.lists.sort().join('-'),
-  });
-
-  return lists.flatMap((boards) =>
-    boards.filter((b) => config.boards.includes(b.name))
+  }).then((lists) =>
+    lists.flatMap((boards) =>
+      boards.filter((b) => config.lists.includes(b.name))
+    )
   );
 }

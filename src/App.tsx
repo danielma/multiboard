@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
 import './App.css';
-import { getBoards } from './utils/trello';
+import { getBoards, getLists } from './utils/trello';
 
 function backoff(done: () => boolean, callback: () => void): void {
   let time = 50;
@@ -59,6 +59,12 @@ function TheActualApp() {
       r.flatMap(setBoards);
     });
   }, []);
+
+  useEffect(() => {
+    boards
+      .map((b) => getLists(b))
+      .map((lP) => lP.then((lists) => lists.flatMap(console.log)));
+  }, [boards]);
 
   return (
     <div>
