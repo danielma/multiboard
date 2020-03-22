@@ -66,7 +66,7 @@ const ListTitle = styled.h2`
 `;
 
 const List = styled.div`
-  background-color: #d3d5da;
+  background-color: #ebecf0;
   border-radius: 3px;
   padding: 8px;
   width: 290px;
@@ -93,7 +93,7 @@ const ListBody = styled.div`
 
   ::-webkit-scrollbar-thumb {
     border-radius: 8px;
-    border: 2px solid #d3d5da; /* should match background, can't be transparent */
+    border: 2px solid #ebecf0; /* should match background, can't be transparent */
     background-color: rgba(0, 0, 0, 0.3);
   }
 
