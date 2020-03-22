@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
 import './App.css';
 import Multiboard from './Multiboard';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 
 function backoff(done: () => boolean, callback: () => void): void {
   let time = 50;
@@ -21,7 +21,11 @@ function backoff(done: () => boolean, callback: () => void): void {
   work();
 }
 
-const AppContainer = styled.div``;
+const AppContainer = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+`;
 
 export default function App() {
   const [trelloReady, setTrelloReady] = useState(false);

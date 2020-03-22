@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getBoards, getLists, getCards, getMembers } from './utils/trello';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 import TrelloCard from './TrelloCard';
 
 type TrelloMultiList = {
@@ -74,6 +74,32 @@ const List = styled.div`
   border-radius: 3px;
   padding: 8px;
   width: 290px;
+
+  max-height: 100%;
+  overflow: auto;
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-scrollbar:vertical {
+    width: 11px;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid #d3d5da; /* should match background, can't be transparent */
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+  }
 `;
 
 export default function Multiboard() {
