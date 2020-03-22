@@ -4,10 +4,10 @@ import { Either, Success, Failure } from '../results';
 
 const CACHE_VERSION = 'v4';
 
-function get(
-  path: string,
-  params: object = {}
-): Promise<Either<TrelloSuccess, TrelloFailure>> {
+type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
+const TrelloResponse = Promise;
+
+function get(path: string, params: object = {}): TrelloResponse<TrelloSuccess> {
   return new Promise((resolve) => {
     window.Trello.get(
       path,
@@ -35,21 +35,18 @@ async function cachedGet<T extends TrelloSuccess>(
   ].join('-');
 
   if (store.has(fullCacheKey)) {
-    console.log('Cache hit for: ', fullCacheKey);
+    console.log('Cache hit for: ', fullCacheKey, store.get(fullCacheKey));
     return Success.from(store.get(fullCacheKey));
   } else {
     const response = await get(path, options.params);
 
-    response.bind((value) => {
+    response.flatMap((value) => {
       store.set(fullCacheKey, value);
     });
 
     return response;
   }
 }
-
-type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
-const TrelloResponse = Promise;
 
 export async function getBoards(): TrelloResponse<TrelloBoard[]> {
   return cachedGet<TrelloBoard[]>('members/me/boards', {
@@ -73,4 +70,8 @@ export async function getLists(
       boards.filter((b) => config.lists.includes(b.name))
     )
   );
+}
+
+export async function getCards(list: TrelloList): TrelloResponse<TrelloCard[]> {
+  return cachedGet<TrelloCard[]>(`lists/${list.id}/cards`);
 }

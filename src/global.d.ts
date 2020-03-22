@@ -24,3 +24,8 @@ type TrelloList = {
   readonly id: string;
   readonly name: string;
 };
+
+type TrelloCard = {
+  readonly id: string;
+  readonly name: string;
+};
