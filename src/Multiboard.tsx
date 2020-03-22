@@ -56,11 +56,11 @@ function useMultiLists(): TrelloMultiList[] {
 }
 
 const Container = styled.div`
-  display: flex;
+  display: inline-flex;
   margin: 16px;
 
   > div {
-    margin-right: 16px;
+    margin-right: 8px;
   }
 `;
 
@@ -68,7 +68,12 @@ const ListTitle = styled.h2`
   margin-bottom: 8px;
 `;
 
-const List = styled.div``;
+const List = styled.div`
+  background-color: #d3d5da;
+  border-radius: 3px;
+  padding: 8px;
+  width: 290px;
+`;
 
 export default function Multiboard() {
   const lists = useMultiLists();
@@ -78,9 +83,15 @@ export default function Multiboard() {
       {lists.map((list) => (
         <List key={list.name}>
           <ListTitle>{list.name}</ListTitle>
-          {list.cards.map((card) => (
-            <TrelloCard key={card.id} card={card} />
-          ))}
+          {list.cards
+            .sort(
+              (cA, cB) =>
+                new Date(cB.dateLastActivity).getTime() -
+                new Date(cA.dateLastActivity).getTime()
+            )
+            .map((card) => (
+              <TrelloCard key={card.id} card={card} />
+            ))}
         </List>
       ))}
     </Container>

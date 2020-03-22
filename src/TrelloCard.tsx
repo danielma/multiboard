@@ -6,7 +6,12 @@ const Wrapper = styled.div<{ background: string }>`
 `;
 
 export default function TrelloCard({ card }: { card: ITrelloCard }) {
-  return (
-    <Wrapper background={card.board.prefs.backgroundColor}>{card.id}</Wrapper>
-  );
+  const boardPrefs = card.board.prefs;
+
+  const background =
+    boardPrefs.backgroundColor ||
+    boardPrefs.backgroundTopColor ||
+    boardPrefs.backgroundBottomColor;
+
+  return <Wrapper background={background || ''}>{card.name}</Wrapper>;
 }

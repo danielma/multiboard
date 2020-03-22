@@ -16,18 +16,24 @@ type TrelloBoard = {
   readonly name: string;
   readonly id: string;
   readonly prefs: {
-    backgroundColor: string;
+    backgroundColor?: string;
+    backgroundBottomColor?: string;
+    backgroundTopColor?: string;
   };
 };
 
 type TrelloList = {
   readonly id: string;
   readonly name: string;
+
   readonly board: TrelloBoard;
 };
 
 type ITrelloCard = {
   readonly id: string;
   readonly name: string;
+  readonly pos: number;
+  readonly dateLastActivity: string;
+
   readonly board: TrelloBoard;
 };
