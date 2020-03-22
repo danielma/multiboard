@@ -47,10 +47,15 @@ type CardLabelProps = {
 function CardLabels({ card }: CardLabelProps) {
   const { showLabelText, toggleShowLabelText } = useContext(MultiboardContext);
 
+  function handleClick(e: React.MouseEvent) {
+    e.preventDefault();
+    toggleShowLabelText();
+  }
+
   if (card.labels.length === 0) return null;
 
   return (
-    <Labels showLabelText={showLabelText} onClick={toggleShowLabelText}>
+    <Labels showLabelText={showLabelText} onClick={handleClick}>
       {card.labels.map((l) => (
         <LabelPill key={l.id} color={l.color}>
           {l.name}
@@ -80,12 +85,7 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
     .filter((m) => m);
 
   return (
-    <Wrapper
-      background={background || ''}
-      href={card.url}
-      target='_blank'
-      onClick={(e) => e.preventDefault()}
-    >
+    <Wrapper background={background || ''} href={card.url} target='_blank'>
       <Card>
         <CardLabels card={card} />
         <CardTitle>{card.name}</CardTitle>
