@@ -64,6 +64,7 @@ function AvatarImage({
       width='30'
       src={avatarUrl(member, 30)}
       srcSet={`${avatarUrl(member, 30)} 1x, ${avatarUrl(member, 50)} 2x`}
+      alt={member.id}
     />
   );
 }

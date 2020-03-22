@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getBoards, getLists, getCards, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
+import store from 'store2';
 import TrelloCard from './TrelloCard';
 
 type TrelloMultiList = {
@@ -8,11 +9,6 @@ type TrelloMultiList = {
   lists: TrelloList[];
   cards: ITrelloCard[];
 };
-
-export const MultiboardContext = React.createContext<{
-  boards: TrelloBoard[];
-  members: ITrelloMember[];
-}>({ boards: [], members: [] });
 
 function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
   const [lists, setLists] = useState<TrelloMultiList[]>([]);
@@ -75,7 +71,12 @@ const List = styled.div`
   padding: 8px;
   width: 290px;
 
-  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ListBody = styled.div`
+  flex: 1;
   overflow: auto;
 
   ::-webkit-scrollbar {
@@ -102,9 +103,22 @@ const List = styled.div`
   }
 `;
 
+export const MultiboardContext = React.createContext<{
+  boards: TrelloBoard[];
+  members: ITrelloMember[];
+  showLabelText: boolean;
+}>({
+  boards: [],
+  members: [],
+  showLabelText: false,
+});
+
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
+  const [showLabelText, setShowLabelText] = useState(
+    store.get('showLabelText') || false
+  );
   const lists = useMultiLists(boards);
 
   useEffect(() => {
@@ -118,20 +132,22 @@ export default function Multiboard() {
   }, []);
 
   return (
-    <MultiboardContext.Provider value={{ members, boards }}>
+    <MultiboardContext.Provider value={{ members, boards, showLabelText }}>
       <Container>
         {lists.map((list) => (
           <List key={list.name}>
             <ListTitle>{list.name}</ListTitle>
-            {list.cards
-              .sort(
-                (cA, cB) =>
-                  new Date(cB.dateLastActivity).getTime() -
-                  new Date(cA.dateLastActivity).getTime()
-              )
-              .map((card) => (
-                <TrelloCard key={card.id} card={card} />
-              ))}
+            <ListBody>
+              {list.cards
+                .sort(
+                  (cA, cB) =>
+                    new Date(cB.dateLastActivity).getTime() -
+                    new Date(cA.dateLastActivity).getTime()
+                )
+                .map((card) => (
+                  <TrelloCard key={card.id} card={card} />
+                ))}
+            </ListBody>
           </List>
         ))}
       </Container>
