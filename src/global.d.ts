@@ -23,9 +23,11 @@ type TrelloBoard = {
 type TrelloList = {
   readonly id: string;
   readonly name: string;
+  readonly board: TrelloBoard;
 };
 
-type TrelloCard = {
+type ITrelloCard = {
   readonly id: string;
   readonly name: string;
+  readonly board: TrelloBoard;
 };

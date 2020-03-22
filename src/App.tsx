@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Helmet from 'react-helmet';
 import './App.css';
-import { getBoards, getLists, getCards } from './utils/trello';
+import Multiboard from './Multiboard';
+import styled from 'styled-components';
 
 function backoff(done: () => boolean, callback: () => void): void {
   let time = 50;
@@ -19,6 +20,8 @@ function backoff(done: () => boolean, callback: () => void): void {
 
   work();
 }
+
+const AppContainer = styled.div``;
 
 export default function App() {
   const [trelloReady, setTrelloReady] = useState(false);
@@ -46,63 +49,9 @@ export default function App() {
         />
       </Helmet>
 
-      {trelloReady ? <TheActualApp /> : 'Waiting for trello :)'}
+      <AppContainer>
+        {trelloReady ? <Multiboard /> : 'Waiting for trello :)'}
+      </AppContainer>
     </>
-  );
-}
-
-type TrelloMultiList = {
-  name: string;
-  lists: TrelloList[];
-  cards: TrelloCard[];
-};
-
-function TheActualApp() {
-  const [lists, setLists] = useState<TrelloMultiList[]>([]);
-
-  useEffect(() => {
-    async function effect() {
-      const boards = await getBoards();
-
-      let multiLists: { [key: string]: TrelloMultiList } = {};
-
-      boards.flatMap(async (boards) => {
-        const listGets = await Promise.all(boards.map(getLists));
-
-        listGets
-          .flatMap((lg) => lg.forcedValue())
-          .forEach((list) => {
-            if (multiLists[list.name]) {
-              multiLists[list.name].lists.push(list);
-            } else {
-              multiLists[list.name] = {
-                name: list.name,
-                lists: [list],
-                cards: [],
-              };
-            }
-          });
-
-        Object.values(multiLists).map(async (multiList) => {
-          const cardGets = await Promise.all(multiList.lists.map(getCards));
-
-          cardGets
-            .flatMap((cg) => cg.forcedValue())
-            .forEach((card) => {
-              multiList.cards.push(card);
-            });
-
-          setLists(Object.values(multiLists));
-        });
-      });
-    }
-
-    effect();
-  }, []);
-
-  return (
-    <div>
-      <pre>{JSON.stringify(lists, null, 4)}</pre>
-    </div>
   );
 }

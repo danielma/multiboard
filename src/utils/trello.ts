@@ -66,12 +66,18 @@ export async function getLists(
     params: { filter: 'open', cards: 'none', fields: 'id,name' },
     cacheKey: config.lists.sort().join('-'),
   }).then((lists) =>
-    lists.flatMap((boards) =>
-      boards.filter((b) => config.lists.includes(b.name))
+    lists.flatMap((lists) =>
+      lists
+        .filter((b) => config.lists.includes(b.name))
+        .map((l) => ({ ...l, board }))
     )
   );
 }
 
-export async function getCards(list: TrelloList): TrelloResponse<TrelloCard[]> {
-  return cachedGet<TrelloCard[]>(`lists/${list.id}/cards`);
+export async function getCards(
+  list: TrelloList
+): TrelloResponse<ITrelloCard[]> {
+  return cachedGet<ITrelloCard[]>(`lists/${list.id}/cards`).then((cards) =>
+    cards.flatMap((cards) => cards.map((c) => ({ ...c, board: list.board })))
+  );
 }

@@ -4,6 +4,7 @@ module.exports = {
     es6: true,
   },
   extends: [
+    'eslint:recommended',
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:react/recommended',
     'plugin:prettier/recommended',
