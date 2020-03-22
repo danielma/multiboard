@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getBoards, getLists, getCards, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
 import store from 'store2';
@@ -12,31 +12,45 @@ type TrelloMultiList = {
   cards: ITrelloCard[];
 };
 
-function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
-  const [lists, setLists] = useState<TrelloMultiList[]>([]);
+function useMultiLists(
+  boards: TrelloBoard[],
+  reloadCounter: number
+): TrelloMultiList[] {
+  const [lists, setLists] = useState<TrelloList[]>([]);
+  const [multiLists, setMultiLists] = useState<TrelloMultiList[]>([]);
+
+  useEffect(() => {
+    async function effect() {
+      const listGets = await Promise.all(boards.map(getLists));
+
+      setLists(listGets.flatMap((lg) => lg.forcedValue()));
+    }
+
+    effect();
+  }, [boards]);
 
   useEffect(() => {
     async function effect() {
       let multiLists: { [key: string]: TrelloMultiList } = {};
 
-      const listGets = await Promise.all(boards.map(getLists));
-
-      listGets
-        .flatMap((lg) => lg.forcedValue())
-        .forEach((list) => {
-          if (multiLists[list.name]) {
-            multiLists[list.name].lists.push(list);
-          } else {
-            multiLists[list.name] = {
-              name: list.name,
-              lists: [list],
-              cards: [],
-            };
-          }
-        });
+      lists.forEach((list) => {
+        if (multiLists[list.name]) {
+          multiLists[list.name].lists.push(list);
+        } else {
+          multiLists[list.name] = {
+            name: list.name,
+            lists: [list],
+            cards: [],
+          };
+        }
+      });
 
       Object.values(multiLists).map(async (multiList) => {
-        const cardGets = await Promise.all(multiList.lists.map(getCards));
+        const cardGets = await Promise.all(
+          multiList.lists.map((l) =>
+            getCards(l, { skipCache: reloadCounter > 0 })
+          )
+        );
 
         cardGets
           .flatMap((cg) => cg.forcedValue())
@@ -44,14 +58,14 @@ function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
             multiList.cards.push(card);
           });
 
-        setLists(Object.values(multiLists));
+        setMultiLists(Object.values(multiLists));
       });
     }
 
     effect();
-  }, [boards]);
+  }, [lists, reloadCounter]);
 
-  return lists;
+  return multiLists;
 }
 
 const Container = styled.div`
@@ -150,6 +164,7 @@ function useCachedToggle(
 type FilterOptions = {
   label: TrelloLabelColor | null;
   member: ITrelloMember | null;
+  reloadCounter: number;
 };
 
 type FilterBarProps = {
@@ -199,6 +214,16 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
           onMemberClick={filterMember}
           focused={filter.member}
         />
+        <button
+          onClick={() =>
+            onUpdateFilter({
+              ...filter,
+              reloadCounter: filter.reloadCounter + 1,
+            })
+          }
+        >
+          Reload
+        </button>
       </Bar>
       <hr style={{ marginBottom: '4px' }} />
     </>
@@ -212,12 +237,13 @@ export default function Multiboard() {
     false,
     'showLabelText'
   );
-  const lists = useMultiLists(boards);
-
   const [filter, setFilter] = useState<FilterOptions>({
     label: null,
     member: null,
+    reloadCounter: 0,
   });
+
+  const lists = useMultiLists(boards, filter.reloadCounter);
 
   useEffect(() => {
     getMembers().then((members) => {

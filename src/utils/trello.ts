@@ -7,7 +7,7 @@ const CACHE_VERSION = 'v4';
 type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
 const TrelloResponse = Promise;
 
-function get(path: string, params: object = {}): TrelloResponse<TrelloSuccess> {
+function get<T>(path: string, params: object = {}): TrelloResponse<T> {
   return new Promise((resolve) => {
     window.Trello.get(
       path,
@@ -38,7 +38,7 @@ async function cachedGet<T extends TrelloSuccess>(
     console.log('Cache hit for: ', fullCacheKey, store.get(fullCacheKey));
     return Success.from(store.get(fullCacheKey));
   } else {
-    const response = await get(path, options.params);
+    const response = await get<T>(path, options.params);
 
     response.flatMap((value) => {
       store.set(fullCacheKey, value);
@@ -75,9 +75,15 @@ export async function getLists(
 }
 
 export async function getCards(
-  list: TrelloList
+  list: TrelloList,
+  options: { skipCache?: boolean } = { skipCache: true }
 ): TrelloResponse<ITrelloCard[]> {
-  return cachedGet<ITrelloCard[]>(`lists/${list.id}/cards`).then((cards) =>
+  const path = `lists/${list.id}/cards`;
+
+  return (options.skipCache
+    ? get<ITrelloCard[]>(path)
+    : cachedGet<ITrelloCard[]>(path)
+  ).then((cards) =>
     cards.flatMap((cards) => cards.map((c) => ({ ...c, board: list.board })))
   );
 }
