@@ -13,7 +13,8 @@
     {
       "name": "Today's PowWow",
       "showLastComment": true,
-      "showCardTitle": false
+      "showCardTitle": false,
+      "sort": "lastAction"
     }
   ],
   "members": [

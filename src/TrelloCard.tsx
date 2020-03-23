@@ -87,9 +87,7 @@ const CardComment = styled(UnstyledCardComment)`
   border-radius: 4px;
 `;
 
-const CardMembers = styled(Members)`
-  float: right;
-`;
+const CardMembers = styled(Members)``;
 
 export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const { board } = card;

@@ -8,12 +8,21 @@ type AppConfig = {
   readonly useTrelloApp: boolean;
 };
 
+const listDefaults: OptionalListConfig = {
+  showLastComment: false,
+  showCardTitle: true,
+  sort: 'lastModified',
+};
+
 let appConfig: AppConfig = {
   boards: source.boards,
   lists: source.lists.map((list) => {
-    return typeof list === 'string'
-      ? { name: list, showLastComment: false, showCardTitle: true }
-      : list;
+    if (typeof list === 'string') {
+      return { name: list, ...listDefaults };
+    } else {
+      const sort = list.sort as ListConfig['sort'];
+      return { ...listDefaults, ...list, sort };
+    }
   }),
   members: source.members,
 

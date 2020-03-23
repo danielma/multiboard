@@ -28,11 +28,14 @@ interface ITrelloAPIList {
   readonly name: string;
 }
 
-type ListConfig = {
-  name: string;
-
+type OptionalListConfig = {
   showLastComment: boolean;
   showCardTitle: boolean;
+  sort: 'lastAction' | 'lastModified';
+};
+
+type ListConfig = OptionalListConfig & {
+  name: string;
 };
 
 interface ITrelloList extends ITrelloAPIList {
@@ -57,7 +60,7 @@ type ITrelloAPICard = {
 
   readonly members: ITrelloMember[];
 
-  readonly actions: ITrelloAction[];
+  readonly actions?: ITrelloAction[];
 };
 
 type ITrelloCard = ITrelloAPICard & {
@@ -65,59 +68,6 @@ type ITrelloCard = ITrelloAPICard & {
   readonly list: ITrelloList;
   readonly board: TrelloBoard;
 };
-
-/*
-  {
-  "id": "5e7919e7eb41ae3d024125e7",
-  "idMemberCreator": "53c96030b0efecbd0d185d6d",
-  "data": {
-    "text": "I just need to know what happens if there is another comment",
-    "card": {
-      "id": "5e79081649212477009f1003",
-      "name": "DMa",
-      "idShort": 1,
-      "shortLink": "nkkALWyn"
-    },
-    "board": {
-      "id": "5e790768273c6f7a15acc990",
-      "name": "Giving Team PowWow",
-      "shortLink": "OC17VgQN"
-    },
-    "list": {
-      "id": "5e7907854c45a45adb9ba6fa",
-      "name": "Today's PowWow"
-    }
-  },
-  "type": "commentCard",
-  "date": "2020-03-23T20:19:51.576Z",
-  "limits": {
-    "reactions": {
-      "perAction": {
-        "status": "ok",
-        "disableAt": 1000,
-        "warnAt": 900
-      },
-      "uniquePerAction": {
-        "status": "ok",
-        "disableAt": 17,
-        "warnAt": 16
-      }
-    }
-  },
-  "memberCreator": {
-    "id": "53c96030b0efecbd0d185d6d",
-    "activityBlocked": false,
-    "avatarHash": "18d666b157faa8998c1319f0cacef802",
-    "avatarUrl": "https://trello-members.s3.amazonaws.com/53c96030b0efecbd0d185d6d/18d666b157faa8998c1319f0cacef802",
-    "fullName": "danielma",
-    "idMemberReferrer": null,
-    "initials": "D",
-    "nonPublic": {},
-    "nonPublicAvailable": true,
-    "username": "danielhgma"
-  }
-}
-*/
 
 interface ITrelloComment extends ITrelloAction {
   readonly type: 'commentCard';

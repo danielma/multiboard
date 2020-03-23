@@ -5,11 +5,14 @@ import store from 'store2';
 import TrelloCard from './TrelloCard';
 import Labels, { LabelPill, labelColors } from './Labels';
 import Members from './Members';
+import config from './config';
 
 type TrelloMultiList = {
   name: string;
   lists: ITrelloList[];
   cards: ITrelloCard[];
+
+  config: ListConfig;
 };
 
 function useMultiLists(
@@ -41,6 +44,7 @@ function useMultiLists(
             name: list.name,
             lists: [list],
             cards: [],
+            config: config.lists.find((l) => l.name === list.name)!,
           };
         }
       });
@@ -226,6 +230,33 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
   );
 }
 
+function sortCardsForList(
+  list: TrelloMultiList,
+  cards: ITrelloCard[]
+): ITrelloCard[] {
+  switch (list.config.sort) {
+    case 'lastModified':
+      return cards.sort(
+        (cA, cB) =>
+          new Date(cB.dateLastActivity).getTime() -
+          new Date(cA.dateLastActivity).getTime()
+      );
+    case 'lastAction':
+      return cards.sort((cA, cB) => {
+        const cADate =
+          cA.actions && cA.actions.length > 0
+            ? new Date(cA.actions[0].date)
+            : new Date(cA.dateLastActivity);
+        const cBDate =
+          cB.actions && cB.actions.length > 0
+            ? new Date(cB.actions[0].date)
+            : new Date(cB.dateLastActivity);
+
+        return cBDate.getTime() - cADate.getTime();
+      });
+  }
+}
+
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
@@ -265,11 +296,7 @@ export default function Multiboard() {
       cards = cards.filter((c) => c.idMembers.includes(member.id));
     }
 
-    return cards.sort(
-      (cA, cB) =>
-        new Date(cB.dateLastActivity).getTime() -
-        new Date(cA.dateLastActivity).getTime()
-    );
+    return sortCardsForList(list, cards);
   }
 
   return (

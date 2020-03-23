@@ -100,7 +100,7 @@ export async function getCards(
 ): TrelloResponse<ITrelloCard[]> {
   const listConfig = config.lists.find((l) => l.name === list.name)!;
 
-  return cachedGet<ITrelloAPICard[]>(`lists/${list.id}/cards`, {
+  return get<ITrelloAPICard[]>(`lists/${list.id}/cards`, {
     params: {
       members: true,
       actions: listConfig.showLastComment ? 'commentCard' : '',
