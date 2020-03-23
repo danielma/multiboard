@@ -1,12 +1,5 @@
 import source from './config.json';
 
-type ListConfig = {
-  name: string;
-
-  showLastComment: boolean;
-  showCardTitle: boolean;
-};
-
 type AppConfig = {
   readonly boards: string[];
   readonly lists: ListConfig[];

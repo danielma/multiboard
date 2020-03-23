@@ -1,11 +1,18 @@
 import React, { useContext, CSSProperties } from 'react';
 import styled from 'styled-components/macro';
+import { DateTime } from 'luxon';
 import { MultiboardContext } from './Multiboard';
 import Labels, { LabelPill } from './Labels';
 import Members from './Members';
 import config from './config';
 
-const Wrapper = styled.a<{ background: string }>`
+const BoardName = styled.small`
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: bold;
+`;
+
+const Wrapper = styled.a<{ background: string; variant: 'dark' | 'light' }>`
   display: block;
   text-decoration: none;
   color: inherit;
@@ -17,6 +24,10 @@ const Wrapper = styled.a<{ background: string }>`
 
   & + & {
     margin-top: 4px;
+  }
+
+  ${BoardName} {
+    color: ${(p) => (p.variant === 'dark' ? '#fff' : '#555')};
   }
 `;
 
@@ -31,14 +42,10 @@ const Card = styled.div`
 const CardTitle = styled.span``;
 
 const CardFooter = styled.div`
-  overflow: auto;
   margin-top: 4px;
-`;
-
-const BoardName = styled.small`
-  text-transform: uppercase;
-  font-size: 10px;
-  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 type CardLabelProps = {
@@ -66,6 +73,20 @@ function CardLabels({ card }: CardLabelProps) {
   );
 }
 
+function UnstyledCardComment(
+  props: { comment: ITrelloComment } & React.HTMLAttributes<HTMLDivElement>
+) {
+  const { comment, ...rest } = props;
+  return <div {...rest}>{comment.data.text}</div>;
+}
+
+const CardComment = styled(UnstyledCardComment)`
+  white-space: pre-line;
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0.07);
+  border-radius: 4px;
+`;
+
 const CardMembers = styled(Members)`
   float: right;
 `;
@@ -84,16 +105,25 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
     ? card.url.replace(/^https:/, 'trello:')
     : card.url;
 
+  const comment = card.list.config.showLastComment && card.comments[0];
+
   return (
     <Wrapper
       background={background}
+      variant={boardPrefs.backgroundBrightness}
       href={url}
       target={config.useTrelloApp ? '' : '_blank'}
     >
       <Card>
         <CardLabels card={card} />
-        <CardTitle>{card.name}</CardTitle>
+        {card.list.config.showCardTitle && <CardTitle>{card.name}</CardTitle>}
+        {comment && <CardComment comment={comment} />}
         <CardFooter>
+          {comment && (
+            <span style={{ flex: 1 }}>
+              {DateTime.fromISO(comment.date).toFormat('L/d')}
+            </span>
+          )}
           <CardMembers members={card.members} />
         </CardFooter>
       </Card>

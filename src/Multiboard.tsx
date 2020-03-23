@@ -8,7 +8,7 @@ import Members from './Members';
 
 type TrelloMultiList = {
   name: string;
-  lists: TrelloList[];
+  lists: ITrelloList[];
   cards: ITrelloCard[];
 };
 
@@ -16,7 +16,7 @@ function useMultiLists(
   boards: TrelloBoard[],
   reloadCounter: number
 ): TrelloMultiList[] {
-  const [lists, setLists] = useState<TrelloList[]>([]);
+  const [lists, setLists] = useState<ITrelloList[]>([]);
   const [multiLists, setMultiLists] = useState<TrelloMultiList[]>([]);
 
   useEffect(() => {

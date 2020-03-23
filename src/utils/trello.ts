@@ -2,7 +2,7 @@ import config from '../config';
 import store from 'store2';
 import { Either, Success, Failure } from '../results';
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 1;
 
 type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
 const TrelloResponse = Promise;
@@ -36,17 +36,24 @@ async function cachedGet<T extends TrelloSuccess>(
   }
 ): Promise<Either<T, TrelloFailure>> {
   const fullCacheKey = [
+    'cache-version',
+    CACHE_VERSION,
     path,
     JSON.stringify(options.params),
     options.cacheKey,
-    CACHE_VERSION,
   ].join('-');
+  const rehydrate = Object.prototype.hasOwnProperty.call(
+    options,
+    'forceRehydrate'
+  )
+    ? options.forceRehydrate
+    : false;
 
-  if (store.has(fullCacheKey) && options.forceRehydrate === false) {
+  if (store.has(fullCacheKey) && rehydrate === false) {
     console.log('Cache hit for: ', fullCacheKey, store.get(fullCacheKey));
     return Success.from(store.get(fullCacheKey));
   } else {
-    const response = await get<T>(path, options.params);
+    const response = await get<T>(path, { params: options.params });
 
     response.flatMap((value) => {
       store.set(fullCacheKey, value);
@@ -69,28 +76,50 @@ export async function getBoards(): TrelloResponse<TrelloBoard[]> {
 
 export async function getLists(
   board: TrelloBoard
-): TrelloResponse<TrelloList[]> {
+): TrelloResponse<ITrelloList[]> {
   const configListNames = config.lists.map((l) => l.name);
 
-  return cachedGet<TrelloList[]>(`boards/${board.id}/lists`, {
+  return cachedGet<ITrelloAPIList[]>(`boards/${board.id}/lists`, {
     params: { filter: 'open', cards: 'none', fields: 'id,name' },
     cacheKey: configListNames.sort().join('-'),
   }).then((lists) =>
     lists.flatMap((lists) =>
       lists
         .filter((b) => configListNames.includes(b.name))
-        .map((l) => ({ ...l, board }))
+        .map((l) => ({
+          ...l,
+          board,
+          config: config.lists.find((cl) => cl.name === l.name)!,
+        }))
     )
   );
 }
 
 export async function getCards(
-  list: TrelloList
+  list: ITrelloList
 ): TrelloResponse<ITrelloCard[]> {
-  return get<ITrelloCard[]>(`lists/${list.id}/cards`, {
-    params: { members: true },
+  const listConfig = config.lists.find((l) => l.name === list.name)!;
+
+  return cachedGet<ITrelloAPICard[]>(`lists/${list.id}/cards`, {
+    params: {
+      members: true,
+      actions: listConfig.showLastComment ? 'commentCard' : '',
+    },
   }).then((cards) =>
-    cards.flatMap((cards) => cards.map((c) => ({ ...c, board: list.board })))
+    cards.flatMap((cards) =>
+      cards.map((c) => {
+        const comments = (c.actions || []).filter(
+          (a) => a.type === 'commentCard'
+        ) as ITrelloComment[];
+
+        return {
+          ...c,
+          list,
+          board: list.board,
+          comments: comments,
+        };
+      })
+    )
   );
 }
 
