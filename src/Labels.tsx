@@ -1,6 +1,6 @@
 import styled from 'styled-components/macro';
 
-export const labelColors = {
+export const labelColors: { [key in TrelloLabelColor]: string } = {
   yellow: '#f3d603',
   green: '#60bd4f',
   pink: '#ff78cb',
@@ -8,6 +8,7 @@ export const labelColors = {
   black: '#354563',
   purple: '#c477e0',
   blue: '#0679bf',
+  lime: '#52e898',
 };
 
 export const LabelPill = styled.li<{

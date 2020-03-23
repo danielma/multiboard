@@ -85,7 +85,8 @@ type TrelloLabelColor =
   | 'yellow'
   | 'green'
   | 'purple'
-  | 'blue';
+  | 'blue'
+  | 'lime';
 
 type ITrelloLabel = {
   id: string;
