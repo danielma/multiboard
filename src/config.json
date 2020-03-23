@@ -1,6 +1,21 @@
 {
-  "boards": ["Giving", "Accounts", "Login", "Giving Team PowWow"],
-  "lists": ["Bugs", "Development", "Staging", "Production", "Today's PowWow"],
+  "boards": [
+    "Giving",
+    "Accounts",
+    "Login",
+    "Giving Team PowWow"
+  ],
+  "lists": [
+    "Bugs",
+    "Development",
+    "Staging",
+    "Production",
+    {
+      "name": "Today's PowWow",
+      "showLastComment": true,
+      "showCardTitle": false
+    }
+  ],
   "members": [
     "danielhgma",
     "wassimk",

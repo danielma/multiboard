@@ -3,7 +3,7 @@ import styled from 'styled-components/macro';
 import { MultiboardContext } from './Multiboard';
 import Labels, { LabelPill } from './Labels';
 import Members from './Members';
-import config from './config.json';
+import config from './config';
 
 const Wrapper = styled.a<{ background: string }>`
   display: block;

@@ -1,4 +1,4 @@
-import config from '../config.json';
+import config from '../config';
 import store from 'store2';
 import { Either, Success, Failure } from '../results';
 
@@ -70,13 +70,15 @@ export async function getBoards(): TrelloResponse<TrelloBoard[]> {
 export async function getLists(
   board: TrelloBoard
 ): TrelloResponse<TrelloList[]> {
+  const configListNames = config.lists.map((l) => l.name);
+
   return cachedGet<TrelloList[]>(`boards/${board.id}/lists`, {
     params: { filter: 'open', cards: 'none', fields: 'id,name' },
-    cacheKey: config.lists.sort().join('-'),
+    cacheKey: configListNames.sort().join('-'),
   }).then((lists) =>
     lists.flatMap((lists) =>
       lists
-        .filter((b) => config.lists.includes(b.name))
+        .filter((b) => configListNames.includes(b.name))
         .map((l) => ({ ...l, board }))
     )
   );
