@@ -6,6 +6,7 @@ import TrelloCard from './TrelloCard';
 import Labels, { LabelPill, labelColors } from './Labels';
 import Members from './Members';
 import config from './config';
+import { useInterval } from './utils/hooks';
 
 type TrelloMultiList = {
   name: string;
@@ -281,6 +282,10 @@ export default function Multiboard() {
       setBoards(boards.forcedValue());
     });
   }, []);
+
+  useInterval(() => {
+    setFilter({ ...filter, reloadCounter: filter.reloadCounter + 1 });
+  }, 30000);
 
   function getCardsForList(list: TrelloMultiList): ITrelloCard[] {
     let cards = list.cards;
