@@ -3,6 +3,7 @@ import styled from 'styled-components/macro';
 import { MultiboardContext } from './Multiboard';
 import Labels, { LabelPill } from './Labels';
 import Members from './Members';
+import config from './config.json';
 
 const Wrapper = styled.a<{ background: string }>`
   display: block;
@@ -78,14 +79,23 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const background =
     boardPrefs.backgroundColor ||
     boardPrefs.backgroundTopColor ||
-    boardPrefs.backgroundBottomColor;
+    boardPrefs.backgroundBottomColor ||
+    '';
+
+  const url = config.useTrelloApp
+    ? card.url.replace(/^https:/, 'trello:')
+    : card.url;
 
   const realMembers: ITrelloMember[] = card.idMembers
     .map((id) => members.find((m) => m.id === id)!)
     .filter((m) => m);
 
   return (
-    <Wrapper background={background || ''} href={card.url} target='_blank'>
+    <Wrapper
+      background={background}
+      href={url}
+      target={config.useTrelloApp ? '' : '_blank'}
+    >
       <Card>
         <CardLabels card={card} />
         <CardTitle>{card.name}</CardTitle>
