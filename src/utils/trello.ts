@@ -7,20 +7,23 @@ const CACHE_VERSION = 'v4';
 type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
 const TrelloResponse = Promise;
 
-function get<T>(path: string, params: object = {}): TrelloResponse<T> {
+type GetOptions = {
+  params?: object;
+};
+
+function get<T>(path: string, options: GetOptions = {}): TrelloResponse<T> {
   return new Promise((resolve) => {
     window.Trello.get(
       path,
-      params,
+      options.params || {},
       (json) => resolve(new Success(json)),
       (jqXhr) => resolve(new Failure(jqXhr))
     );
   });
 }
 
-type CachedGetOptions = {
+type CachedGetOptions = GetOptions & {
   cacheKey?: string;
-  params?: object;
   forceRehydrate?: boolean;
 };
 
@@ -82,7 +85,9 @@ export async function getLists(
 export async function getCards(
   list: TrelloList
 ): TrelloResponse<ITrelloCard[]> {
-  return get<ITrelloCard[]>(`lists/${list.id}/cards`).then((cards) =>
+  return get<ITrelloCard[]>(`lists/${list.id}/cards`, {
+    params: { members: true },
+  }).then((cards) =>
     cards.flatMap((cards) => cards.map((c) => ({ ...c, board: list.board })))
   );
 }

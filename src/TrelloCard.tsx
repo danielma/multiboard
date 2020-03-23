@@ -74,8 +74,6 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const { board } = card;
   const boardPrefs = board.prefs;
 
-  const { members } = useContext(MultiboardContext);
-
   const background =
     boardPrefs.backgroundColor ||
     boardPrefs.backgroundTopColor ||
@@ -85,10 +83,6 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const url = config.useTrelloApp
     ? card.url.replace(/^https:/, 'trello:')
     : card.url;
-
-  const realMembers: ITrelloMember[] = card.idMembers
-    .map((id) => members.find((m) => m.id === id)!)
-    .filter((m) => m);
 
   return (
     <Wrapper
@@ -100,7 +94,7 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
         <CardLabels card={card} />
         <CardTitle>{card.name}</CardTitle>
         <CardFooter>
-          <CardMembers members={realMembers} />
+          <CardMembers members={card.members} />
         </CardFooter>
       </Card>
       <BoardName>{board.name}</BoardName>

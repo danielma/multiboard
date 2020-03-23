@@ -40,6 +40,8 @@ type ITrelloCard = {
   readonly labels: ITrelloLabel[];
 
   readonly board: TrelloBoard;
+
+  readonly members: ITrelloMember[];
 };
 
 type TrelloLabelColor =
@@ -48,7 +50,8 @@ type TrelloLabelColor =
   | 'black'
   | 'yellow'
   | 'green'
-  | 'purple';
+  | 'purple'
+  | 'blue';
 
 type ITrelloLabel = {
   id: string;

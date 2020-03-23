@@ -7,6 +7,7 @@ export const labelColors = {
   red: '#eb5b46',
   black: '#354563',
   purple: '#c477e0',
+  blue: '#0679bf',
 };
 
 export const LabelPill = styled.li<{

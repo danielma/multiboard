@@ -1,6 +1,6 @@
 {
-  "boards": ["Giving", "Accounts", "Login"],
-  "lists": ["Development", "Staging", "Production"],
+  "boards": ["Giving", "Accounts", "Login", "Giving Team PowWow"],
+  "lists": ["Bugs", "Development", "Staging", "Production", "Today's PowWow"],
   "members": [
     "danielhgma",
     "wassimk",
