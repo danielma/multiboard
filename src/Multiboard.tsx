@@ -6,6 +6,7 @@ import TrelloCard from './TrelloCard';
 import Labels, { LabelPill, labelColors } from './Labels';
 import Members from './Members';
 import config from './config';
+import { Button } from './UI';
 import { useInterval } from './utils/hooks';
 
 type TrelloMultiList = {
@@ -176,6 +177,11 @@ type FilterBarProps = {
 
 const Bar = styled.div`
   display: flex;
+  align-items: center;
+
+  > * {
+    margin-right: 8px;
+  }
 `;
 
 function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
@@ -215,7 +221,7 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
           onMemberClick={filterMember}
           focused={filter.member}
         />
-        <button
+        <Button
           onClick={() =>
             onUpdateFilter({
               ...filter,
@@ -224,7 +230,7 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
           }
         >
           Reload
-        </button>
+        </Button>
       </Bar>
       <hr style={{ marginBottom: '4px' }} />
     </>
