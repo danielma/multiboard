@@ -61,6 +61,7 @@ type ITrelloAPICard = {
   readonly dateLastActivity: string;
   readonly idMembers: string[];
   readonly url: string;
+  readonly subscribed: boolean;
 
   readonly labels: ITrelloLabel[];
 

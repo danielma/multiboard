@@ -5,7 +5,7 @@ import store from 'store2';
 import MultiList from './MultiList';
 import { List } from './UI';
 import { useInterval } from './utils/hooks';
-import FilterBar, { FilterOptions } from './FilterBar';
+import FilterBar, { buildCardFilter, defaultFilter } from './FilterBar';
 
 function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
   const [multiLists, setMultiLists] = useState<{
@@ -88,11 +88,7 @@ export default function Multiboard() {
     false,
     'showLabelText'
   );
-  const [filter, setFilter] = useState<FilterOptions>({
-    label: null,
-    member: null,
-    reloadCounter: 0,
-  });
+  const [filter, setFilter] = useState(defaultFilter);
   const lists = useMultiLists(boards);
 
   useEffect(() => {
@@ -109,27 +105,7 @@ export default function Multiboard() {
     setFilter({ ...filter, reloadCounter: filter.reloadCounter + 1 });
   }, 30000);
 
-  const filterCards = React.useCallback(
-    function (incomingCards: ITrelloCard[]) {
-      let cards = incomingCards;
-
-      if (filter.label) {
-        const { label } = filter;
-        cards = cards.filter((c) =>
-          c.labels.map((l) => l.color).includes(label)
-        );
-      }
-
-      if (filter.member) {
-        const { member } = filter;
-
-        cards = cards.filter((c) => c.idMembers.includes(member.id));
-      }
-
-      return cards;
-    },
-    [filter]
-  );
+  const filterCards = React.useMemo(() => buildCardFilter(filter), [filter]);
 
   return (
     <MultiboardContext.Provider

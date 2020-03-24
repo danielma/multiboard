@@ -14,6 +14,19 @@ export const Button = styled.button`
   }
 `;
 
+export function Checkbox(props: React.HTMLAttributes<HTMLInputElement>) {
+  const { children, ...rest } = props;
+  const id = `checkbox-${children}`;
+  return (
+    <div>
+      <input type='checkbox' id={id} {...rest} />
+      <label htmlFor={id} style={{ paddingLeft: '4px' }}>
+        {children}
+      </label>
+    </div>
+  );
+}
+
 function UnstyledEmoji({
   emoji,
   label = 'emoji',
