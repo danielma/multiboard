@@ -3,11 +3,9 @@ import { getBoards, getLists, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
 import store from 'store2';
 import MultiList from './MultiList';
-import Labels, { LabelPill, labelColors } from './Labels';
-import Members from './Members';
-import { Button, Emoji, List } from './UI';
+import { List } from './UI';
 import { useInterval } from './utils/hooks';
-import { clearCache } from './utils/api-cache';
+import FilterBar, { FilterOptions } from './FilterBar';
 
 function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
   const [multiLists, setMultiLists] = useState<{
@@ -83,88 +81,6 @@ function useCachedToggle(
   ];
 }
 
-type FilterOptions = {
-  label: TrelloLabelColor | null;
-  member: ITrelloMember | null;
-  reloadCounter: number;
-};
-
-type FilterBarProps = {
-  members: ITrelloMember[];
-  filter: FilterOptions;
-  onUpdateFilter: (newFilter: FilterOptions) => void;
-};
-
-const Bar = styled.div`
-  display: flex;
-  align-items: center;
-
-  > * {
-    margin-right: 8px;
-  }
-`;
-
-function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
-  function filterColor(color: TrelloLabelColor) {
-    if (filter.label === color) {
-      onUpdateFilter({ ...filter, label: null });
-    } else {
-      onUpdateFilter({ ...filter, label: color });
-    }
-  }
-
-  function filterMember(member: ITrelloMember) {
-    if (filter.member?.id === member.id) {
-      onUpdateFilter({ ...filter, member: null });
-    } else {
-      onUpdateFilter({ ...filter, member: member });
-    }
-  }
-
-  return (
-    <>
-      <Bar>
-        <Labels showLabelText>
-          {Object.keys(labelColors).map((color) => (
-            <LabelPill
-              key={color}
-              color={color as TrelloLabelColor}
-              focused={filter.label ? filter.label === color : undefined}
-              onClick={() => filterColor(color as TrelloLabelColor)}
-            >
-              {color}
-            </LabelPill>
-          ))}
-        </Labels>
-        <Members
-          members={members}
-          onMemberClick={filterMember}
-          focused={filter.member}
-        />
-        <Button
-          onClick={() =>
-            onUpdateFilter({
-              ...filter,
-              reloadCounter: filter.reloadCounter + 1,
-            })
-          }
-        >
-          Reload cards
-        </Button>
-        <Button
-          onClick={() => {
-            clearCache();
-            window.location.reload();
-          }}
-        >
-          Clear cache <Emoji emoji='🔥' />
-        </Button>
-      </Bar>
-      <hr style={{ marginBottom: '4px' }} />
-    </>
-  );
-}
-
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
@@ -225,6 +141,7 @@ export default function Multiboard() {
           filter={filter}
           onUpdateFilter={setFilter}
         />
+        <hr style={{ marginBottom: '4px' }} />
         <List.Container>
           {lists.map((list) => (
             <MultiList
