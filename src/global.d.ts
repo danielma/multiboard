@@ -38,6 +38,12 @@ type ListConfig = OptionalListConfig & {
   name: string;
 };
 
+type TrelloMultiList = {
+  name: string;
+  lists: ITrelloList[];
+  config: ListConfig;
+};
+
 interface ITrelloList extends ITrelloAPIList {
   readonly board: TrelloBoard;
   readonly config: ListConfig;

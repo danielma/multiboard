@@ -1,4 +1,4 @@
-import React, { useContext, CSSProperties } from 'react';
+import React, { useContext } from 'react';
 import styled from 'styled-components/macro';
 import { DateTime } from 'luxon';
 import { MultiboardContext } from './Multiboard';
