@@ -5,6 +5,7 @@ import { MultiboardContext } from './Multiboard';
 import Labels, { LabelPill } from './Labels';
 import Members from './Members';
 import config from './config';
+import Icons from './Icons';
 
 const BoardName = styled.small`
   text-transform: uppercase;
@@ -45,7 +46,8 @@ const CardFooter = styled.div`
   margin-top: 4px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  color: #5e6c84;
+  font-weight: 500;
 `;
 
 type CardLabelProps = {
@@ -87,7 +89,9 @@ const CardComment = styled(UnstyledCardComment)`
   border-radius: 4px;
 `;
 
-const CardMembers = styled(Members)``;
+const CardMembers = styled(Members)`
+  margin-left: auto;
+`;
 
 export default function TrelloCard({ card }: { card: ITrelloCard }) {
   const { board } = card;
@@ -117,6 +121,7 @@ export default function TrelloCard({ card }: { card: ITrelloCard }) {
         {card.list.config.showCardTitle && <CardTitle>{card.name}</CardTitle>}
         {comment && <CardComment comment={comment} />}
         <CardFooter>
+          <div>{card.subscribed && <Icons.Eye />}</div>
           {comment && (
             <span style={{ flex: 1 }}>
               {DateTime.fromISO(comment.date).toFormat('L/d')}
