@@ -3,19 +3,16 @@ import TrelloCard from './TrelloCard';
 import { List } from './UI';
 import { getCards } from './utils/trello';
 
-function sortCardsForList(
-  list: TrelloMultiList,
-  cards: ITrelloCard[]
-): ITrelloCard[] {
-  switch (list.config.sort) {
+function sorter(
+  sortType: ListConfig['sort']
+): (cA: ITrelloCard, cB: ITrelloCard) => number {
+  switch (sortType) {
     case 'lastModified':
-      return cards.sort(
-        (cA, cB) =>
-          new Date(cB.dateLastActivity).getTime() -
-          new Date(cA.dateLastActivity).getTime()
-      );
+      return (cA, cB) =>
+        new Date(cB.dateLastActivity).getTime() -
+        new Date(cA.dateLastActivity).getTime();
     case 'lastAction':
-      return cards.sort((cA, cB) => {
+      return (cA, cB) => {
         const cADate =
           cA.actions && cA.actions.length > 0
             ? new Date(cA.actions[0].date)
@@ -26,7 +23,9 @@ function sortCardsForList(
             : new Date(cB.dateLastActivity);
 
         return cBDate.getTime() - cADate.getTime();
-      });
+      };
+    case 'position':
+      return (cA, cB) => cB.pos - cA.pos;
   }
 }
 
@@ -40,7 +39,7 @@ export default function MultiList({
   reloadCounter: number;
 }) {
   const [cards, setCards] = useState<ITrelloCard[]>([]);
-  const sortedCards = sortCardsForList(list, filterCards(cards));
+  const sortedCards = filterCards(cards).sort(sorter(list.config.sort));
 
   useEffect(() => {
     async function effect() {

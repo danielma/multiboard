@@ -31,7 +31,7 @@ interface ITrelloAPIList {
 type OptionalListConfig = {
   showLastComment: boolean;
   showCardTitle: boolean;
-  sort: 'lastAction' | 'lastModified';
+  sort: 'lastAction' | 'lastModified' | 'position';
 };
 
 type ListConfig = OptionalListConfig & {

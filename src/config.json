@@ -6,7 +6,7 @@
     "Giving Team PowWow"
   ],
   "lists": [
-    "Bugs",
+    { "name": "Bugs", "sort": "position" },
     "Development",
     "Staging",
     "Production",
