@@ -29,3 +29,63 @@ function UnstyledEmoji({
 export const Emoji = styled(UnstyledEmoji)`
   line-height: 1em;
 `;
+
+const ListTitle = styled.h2`
+  margin-bottom: 8px;
+`;
+
+const ListWrapper = styled.div`
+  background-color: #ebecf0;
+  border-radius: 3px;
+  padding: 8px;
+  width: 290px;
+
+  display: inline-flex;
+  flex-direction: column;
+`;
+
+const ListBody = styled.div`
+  flex: 1;
+  overflow: auto;
+
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+  }
+
+  ::-webkit-scrollbar:vertical {
+    width: 11px;
+  }
+
+  ::-webkit-scrollbar:horizontal {
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    border: 2px solid #ebecf0; /* should match background, can't be transparent */
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+  }
+`;
+
+const ListsContainer = styled.div`
+  flex: 1;
+  display: inline-flex;
+  align-items: stretch;
+  overflow: hidden;
+
+  > div {
+    margin-right: 8px;
+  }
+`;
+
+export const List = {
+  Container: ListsContainer,
+  List: ListWrapper,
+  Title: ListTitle,
+  Body: ListBody,
+};

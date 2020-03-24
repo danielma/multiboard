@@ -1,74 +1,46 @@
 import React, { useState, useEffect } from 'react';
-import { getBoards, getLists, getCards, getMembers } from './utils/trello';
+import { getBoards, getLists, getMembers } from './utils/trello';
 import styled from 'styled-components/macro';
 import store from 'store2';
-import TrelloCard from './TrelloCard';
+import MultiList from './MultiList';
 import Labels, { LabelPill, labelColors } from './Labels';
 import Members from './Members';
-import config from './config';
-import { Button, Emoji } from './UI';
+import { Button, Emoji, List } from './UI';
 import { useInterval } from './utils/hooks';
 import { clearCache } from './utils/api-cache';
 
-type TrelloMultiList = {
-  name: string;
-  lists: ITrelloList[];
-  cards: ITrelloCard[];
-
-  config: ListConfig;
-};
-
-function useMultiLists(
-  boards: TrelloBoard[],
-  reloadCounter: number
-): TrelloMultiList[] {
-  const [lists, setLists] = useState<ITrelloList[]>([]);
-  const [multiLists, setMultiLists] = useState<TrelloMultiList[]>([]);
+function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
+  const [multiLists, setMultiLists] = useState<{
+    [key: string]: TrelloMultiList;
+  }>({});
 
   useEffect(() => {
     async function effect() {
       const listGets = await Promise.all(boards.map(getLists));
 
-      setLists(listGets.flatMap((lg) => lg.forcedValue()));
-    }
+      const loadedLists = listGets.flatMap((lg) => lg.forcedValue());
 
-    effect();
-  }, [boards]);
+      let ml: { [key: string]: TrelloMultiList } = {};
 
-  useEffect(() => {
-    async function effect() {
-      let multiLists: { [key: string]: TrelloMultiList } = {};
-
-      lists.forEach((list) => {
-        if (multiLists[list.name]) {
-          multiLists[list.name].lists.push(list);
-        } else {
-          multiLists[list.name] = {
+      loadedLists.forEach((list) => {
+        if (!ml[list.name]) {
+          ml[list.name] = {
             name: list.name,
-            lists: [list],
-            cards: [],
-            config: config.lists.find((l) => l.name === list.name)!,
+            lists: [],
+            config: list.config,
           };
         }
+
+        ml[list.name].lists.push(list);
       });
 
-      Object.values(multiLists).map(async (multiList) => {
-        const cardGets = await Promise.all(multiList.lists.map(getCards));
-
-        cardGets
-          .flatMap((cg) => cg.forcedValue())
-          .forEach((card) => {
-            multiList.cards.push(card);
-          });
-
-        setMultiLists(Object.values(multiLists));
-      });
+      setMultiLists(ml);
     }
 
     effect();
-  }, [lists, reloadCounter]);
+  }, [boards, setMultiLists]);
 
-  return multiLists;
+  return Object.values(multiLists);
 }
 
 const Container = styled.div`
@@ -76,59 +48,6 @@ const Container = styled.div`
   flex-direction: column;
   align-items: stretch;
   margin: 16px;
-`;
-
-const Lists = styled.div`
-  flex: 1;
-  display: inline-flex;
-  align-items: stretch;
-  overflow: hidden;
-
-  > div {
-    margin-right: 8px;
-  }
-`;
-
-const ListTitle = styled.h2`
-  margin-bottom: 8px;
-`;
-
-const List = styled.div`
-  background-color: #ebecf0;
-  border-radius: 3px;
-  padding: 8px;
-  width: 290px;
-
-  display: inline-flex;
-  flex-direction: column;
-`;
-
-const ListBody = styled.div`
-  flex: 1;
-  overflow: auto;
-
-  ::-webkit-scrollbar {
-    -webkit-appearance: none;
-  }
-
-  ::-webkit-scrollbar:vertical {
-    width: 11px;
-  }
-
-  ::-webkit-scrollbar:horizontal {
-    height: 11px;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    border: 2px solid #ebecf0; /* should match background, can't be transparent */
-    background-color: rgba(0, 0, 0, 0.3);
-  }
-
-  ::-webkit-scrollbar-track {
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-  }
 `;
 
 export const MultiboardContext = React.createContext<{
@@ -246,33 +165,6 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
   );
 }
 
-function sortCardsForList(
-  list: TrelloMultiList,
-  cards: ITrelloCard[]
-): ITrelloCard[] {
-  switch (list.config.sort) {
-    case 'lastModified':
-      return cards.sort(
-        (cA, cB) =>
-          new Date(cB.dateLastActivity).getTime() -
-          new Date(cA.dateLastActivity).getTime()
-      );
-    case 'lastAction':
-      return cards.sort((cA, cB) => {
-        const cADate =
-          cA.actions && cA.actions.length > 0
-            ? new Date(cA.actions[0].date)
-            : new Date(cA.dateLastActivity);
-        const cBDate =
-          cB.actions && cB.actions.length > 0
-            ? new Date(cB.actions[0].date)
-            : new Date(cB.dateLastActivity);
-
-        return cBDate.getTime() - cADate.getTime();
-      });
-  }
-}
-
 export default function Multiboard() {
   const [boards, setBoards] = useState<TrelloBoard[]>([]);
   const [members, setMembers] = useState<ITrelloMember[]>([]);
@@ -285,8 +177,7 @@ export default function Multiboard() {
     member: null,
     reloadCounter: 0,
   });
-
-  const lists = useMultiLists(boards, filter.reloadCounter);
+  const lists = useMultiLists(boards);
 
   useEffect(() => {
     getMembers().then((members) => {
@@ -302,22 +193,27 @@ export default function Multiboard() {
     setFilter({ ...filter, reloadCounter: filter.reloadCounter + 1 });
   }, 30000);
 
-  function getCardsForList(list: TrelloMultiList): ITrelloCard[] {
-    let cards = list.cards;
+  const filterCards = React.useCallback(
+    function (incomingCards: ITrelloCard[]) {
+      let cards = incomingCards;
 
-    if (filter.label) {
-      const { label } = filter;
-      cards = cards.filter((c) => c.labels.map((l) => l.color).includes(label));
-    }
+      if (filter.label) {
+        const { label } = filter;
+        cards = cards.filter((c) =>
+          c.labels.map((l) => l.color).includes(label)
+        );
+      }
 
-    if (filter.member) {
-      const { member } = filter;
+      if (filter.member) {
+        const { member } = filter;
 
-      cards = cards.filter((c) => c.idMembers.includes(member.id));
-    }
+        cards = cards.filter((c) => c.idMembers.includes(member.id));
+      }
 
-    return sortCardsForList(list, cards);
-  }
+      return cards;
+    },
+    [filter]
+  );
 
   return (
     <MultiboardContext.Provider
@@ -329,18 +225,16 @@ export default function Multiboard() {
           filter={filter}
           onUpdateFilter={setFilter}
         />
-        <Lists>
+        <List.Container>
           {lists.map((list) => (
-            <List key={list.name}>
-              <ListTitle>{list.name}</ListTitle>
-              <ListBody>
-                {getCardsForList(list).map((card) => (
-                  <TrelloCard key={card.id} card={card} />
-                ))}
-              </ListBody>
-            </List>
+            <MultiList
+              key={list.name}
+              list={list}
+              filterCards={filterCards}
+              reloadCounter={filter.reloadCounter}
+            />
           ))}
-        </Lists>
+        </List.Container>
       </Container>
     </MultiboardContext.Provider>
   );
