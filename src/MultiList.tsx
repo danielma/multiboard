@@ -25,7 +25,7 @@ function sorter(
         return cBDate.getTime() - cADate.getTime();
       };
     case 'position':
-      return (cA, cB) => cB.pos - cA.pos;
+      return (cA, cB) => cA.pos - cB.pos;
   }
 }
 
