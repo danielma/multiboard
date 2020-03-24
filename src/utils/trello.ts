@@ -1,8 +1,6 @@
 import config from '../config';
-import store from 'store2';
+import { request } from './api-cache';
 import { Either, Success, Failure } from '../results';
-
-const CACHE_VERSION = 1;
 
 type TrelloResponse<T> = Promise<Either<T, TrelloFailure>>;
 const TrelloResponse = Promise;
@@ -30,37 +28,16 @@ type CachedGetOptions = GetOptions & {
 async function cachedGet<T extends TrelloSuccess>(
   path: string,
   options: CachedGetOptions = {
-    params: {},
-    cacheKey: '',
     forceRehydrate: false,
   }
 ): Promise<Either<T, TrelloFailure>> {
-  const fullCacheKey = [
-    'cache-version',
-    CACHE_VERSION,
+  const cacheKey = [
     path,
     JSON.stringify(options.params),
     options.cacheKey,
   ].join('-');
-  const rehydrate = Object.prototype.hasOwnProperty.call(
-    options,
-    'forceRehydrate'
-  )
-    ? options.forceRehydrate
-    : false;
 
-  if (store.has(fullCacheKey) && rehydrate === false) {
-    console.log('Cache hit for: ', fullCacheKey, store.get(fullCacheKey));
-    return Success.from(store.get(fullCacheKey));
-  } else {
-    const response = await get<T>(path, { params: options.params });
-
-    response.flatMap((value) => {
-      store.set(fullCacheKey, value);
-    });
-
-    return response;
-  }
+  return request(() => get(path, options), cacheKey);
 }
 
 export async function getBoards(): TrelloResponse<TrelloBoard[]> {

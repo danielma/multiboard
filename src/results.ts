@@ -13,8 +13,8 @@ export declare interface Either<T, U> {
 export class Success<T> implements Either<T, any> {
   private value: T;
 
-  static from(value: any) {
-    return new Success(value);
+  static from<V>(value: V) {
+    return new Success<V>(value);
   }
 
   constructor(value: T) {
@@ -56,6 +56,7 @@ export class Failure<T> implements Either<any, T> {
   constructor(value: T) {
     this.value = value;
   }
+
   isSuccess() {
     return false;
   }

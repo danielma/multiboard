@@ -6,8 +6,9 @@ import TrelloCard from './TrelloCard';
 import Labels, { LabelPill, labelColors } from './Labels';
 import Members from './Members';
 import config from './config';
-import { Button } from './UI';
+import { Button, Emoji } from './UI';
 import { useInterval } from './utils/hooks';
+import { clearCache } from './utils/api-cache';
 
 type TrelloMultiList = {
   name: string;
@@ -229,7 +230,15 @@ function FilterBar({ members, filter, onUpdateFilter }: FilterBarProps) {
             })
           }
         >
-          Reload
+          Reload cards
+        </Button>
+        <Button
+          onClick={() => {
+            clearCache();
+            window.location.reload();
+          }}
+        >
+          Clear cache <Emoji emoji='🔥' />
         </Button>
       </Bar>
       <hr style={{ marginBottom: '4px' }} />

@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components/macro';
 
 export const Button = styled.button`
@@ -11,4 +12,20 @@ export const Button = styled.button`
   &:hover {
     background-color: #f0f0f0;
   }
+`;
+
+function UnstyledEmoji({
+  emoji,
+  label = 'emoji',
+  ...rest
+}: { emoji: string; label?: string } & React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <span role='img' aria-label={label} {...rest}>
+      {emoji}
+    </span>
+  );
+}
+
+export const Emoji = styled(UnstyledEmoji)`
+  line-height: 1em;
 `;
