@@ -14,7 +14,8 @@
       "name": "Today's PowWow",
       "showLastComment": true,
       "showCardTitle": false,
-      "sort": "lastAction"
+      "sort": "lastAction",
+      "display": "wide"
     }
   ],
   "members": [

@@ -32,6 +32,7 @@ type OptionalListConfig = {
   showLastComment: boolean;
   showCardTitle: boolean;
   sort: 'lastAction' | 'lastModified' | 'position';
+  display: 'normal' | 'wide';
 };
 
 type ListConfig = OptionalListConfig & {

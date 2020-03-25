@@ -52,7 +52,7 @@ export default function MultiList({
   }, [reloadCounter, list.lists, reloadCounter]);
 
   return (
-    <List.List>
+    <List.List display={list.config.display}>
       <List.Title>{list.name}</List.Title>
       <List.Body>
         {sortedCards.map((card) => (

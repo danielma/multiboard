@@ -47,11 +47,11 @@ const ListTitle = styled.h2`
   margin-bottom: 8px;
 `;
 
-const ListWrapper = styled.div`
+const ListWrapper = styled.div<{ display: ListConfig['display'] }>`
   background-color: #ebecf0;
   border-radius: 3px;
   padding: 8px;
-  width: 290px;
+  width: ${(p) => (p.display === 'wide' ? '450px' : '290px')};
 
   display: inline-flex;
   flex-direction: column;

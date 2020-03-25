@@ -12,6 +12,7 @@ const listDefaults: OptionalListConfig = {
   showLastComment: false,
   showCardTitle: true,
   sort: 'lastModified',
+  display: 'normal',
 };
 
 let appConfig: AppConfig = {
@@ -21,7 +22,8 @@ let appConfig: AppConfig = {
       return { name: list, ...listDefaults };
     } else {
       const sort = list.sort as ListConfig['sort'];
-      return { ...listDefaults, ...list, sort };
+      const display = list.display as ListConfig['display'];
+      return { ...listDefaults, ...list, sort, display };
     }
   }),
   members: source.members,
