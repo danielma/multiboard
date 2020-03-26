@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import config from './config';
 import Helmet from 'react-helmet';
 import './App.css';
 import Multiboard from './Multiboard';
@@ -48,6 +49,7 @@ export default function App() {
   return (
     <>
       <Helmet>
+        <title>{config.name}</title>
         <script
           src={`https://trello.com/1/client.js?key=${process.env.REACT_APP_TRELLO_API_KEY}`}
         />

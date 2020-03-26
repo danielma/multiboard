@@ -5,6 +5,7 @@ type AppConfig = {
   readonly lists: ListConfig[];
   readonly members: string[];
 
+  readonly name: string;
   readonly useTrelloApp: boolean;
 };
 
@@ -28,6 +29,7 @@ let appConfig: AppConfig = {
   }),
   members: source.members,
 
+  name: source.name,
   useTrelloApp: source.useTrelloApp,
 };
 
