@@ -1,4 +1,4 @@
-import source from './config.json';
+import source from './giving-team-multiboard-config';
 
 type AppConfig = {
   readonly boards: string[];

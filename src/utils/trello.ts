@@ -46,7 +46,7 @@ export async function getBoards(): TrelloResponse<TrelloBoard[]> {
     cacheKey: config.boards.sort().join('-'),
   }).then((boards) =>
     boards.flatMap((boards) =>
-      boards.filter((b) => config.boards.includes(b.name))
+      boards.filter((b) => config.boards.includes(b.id))
     )
   );
 }
