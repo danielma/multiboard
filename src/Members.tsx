@@ -4,7 +4,7 @@ import styled from 'styled-components/macro';
 type AvatarSize = 30 | 50 | 170;
 
 function avatarUrl(member: ITrelloMember, size: AvatarSize): string {
-  return `https://trello-avatars.s3.amazonaws.com/${member.avatarHash}/${size}.png`;
+  return `${member.avatarUrl}/${size}.png`;
 }
 
 function AvatarImage({
