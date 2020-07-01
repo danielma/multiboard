@@ -36,7 +36,7 @@ function useMultiLists(boards: TrelloBoard[]): TrelloMultiList[] {
     }
 
     effect();
-  }, [boards, setMultiLists]);
+  }, [boards]);
 
   return Object.values(multiLists);
 }

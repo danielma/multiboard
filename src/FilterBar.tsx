@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import styled from 'styled-components/macro';
 import Labels, { LabelPill, labelColors } from './Labels';
 import { Button, Emoji, Checkbox } from './UI';
@@ -80,9 +80,25 @@ export default function FilterBar({
     }
   }
 
-  function toggleOnlyWatching() {
+  const toggleOnlyWatching = useCallback(() => {
     onUpdateFilter({ ...filter, onlyWatching: !filter.onlyWatching });
-  }
+  }, [onUpdateFilter, filter]);
+
+  useEffect(() => {
+    function globalKeydown(e: KeyboardEvent) {
+      switch (e.key) {
+        case 'q':
+          toggleOnlyWatching();
+          break;
+        default:
+          void 0;
+      }
+    }
+
+    document.addEventListener('keydown', globalKeydown);
+
+    return () => document.removeEventListener('keydown', globalKeydown);
+  }, [toggleOnlyWatching]);
 
   return (
     <Bar>
@@ -103,7 +119,9 @@ export default function FilterBar({
         onMemberClick={filterMember}
         focused={filter.member}
       />
-      <Checkbox onChange={toggleOnlyWatching}>Watching</Checkbox>
+      <Checkbox onChange={toggleOnlyWatching} checked={filter.onlyWatching}>
+        Watching
+      </Checkbox>
       <Button
         onClick={() =>
           onUpdateFilter({

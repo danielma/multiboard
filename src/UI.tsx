@@ -14,7 +14,7 @@ export const Button = styled.button`
   }
 `;
 
-export function Checkbox(props: React.HTMLAttributes<HTMLInputElement>) {
+export function Checkbox(props: React.InputHTMLAttributes<HTMLInputElement>) {
   const { children, ...rest } = props;
   const id = `checkbox-${children}`;
   return (
