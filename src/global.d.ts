@@ -88,6 +88,7 @@ interface ITrelloComment extends ITrelloAction {
 
 type TrelloLabelColor =
   | 'red'
+  | 'orange'
   | 'pink'
   | 'black'
   | 'yellow'

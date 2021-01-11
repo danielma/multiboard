@@ -4,6 +4,7 @@ export const labelColors: { [key in TrelloLabelColor]: string } = {
   yellow: '#f3d603',
   green: '#60bd4f',
   pink: '#ff78cb',
+  orange: '#ff9f19',
   red: '#eb5b46',
   black: '#354563',
   purple: '#c477e0',
